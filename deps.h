@@ -10,7 +10,7 @@
 #include <pthread.h>
 #include <regex.h>
 #include <unistd.h>
-#include "queue/pbl/src/src/pbl.h"
+#include "queue/src/pbl.h"
 
 #define ERROR_INTERNAL 001
 

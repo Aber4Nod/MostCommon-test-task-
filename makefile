@@ -3,7 +3,7 @@ CFLAGS=  -Wall -O3 ${IPATH} -DPBLTEST
 LDFLAGS= -lpthread
 CC= gcc
 
-THELIB    = queue/pbl/src/src/libpbl.a
+THELIB    = queue/src/libpbl.a
 
 EXE_OBJS1 = main.o
 THEEXE1   = t
