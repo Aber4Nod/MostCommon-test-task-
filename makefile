@@ -1,5 +1,3 @@
-IPATH=   -I.
-CFLAGS=  -Wall -O3 ${IPATH} -DPBLTEST
 LDFLAGS= -lpthread
 CC= gcc
 
