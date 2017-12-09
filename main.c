@@ -5,10 +5,10 @@
  * [Program Base Library is used]*/
 void buildQueue(const Static* st)
 {
-        if (fseek(st->fp, 0, SEEK_SET)) {
-                perror("fseek");
-                exit(ERROR_INTERNAL);
-        }
+    if (fseek(st->fp, 0, SEEK_SET)) {
+        perror("fseek");
+        exit(ERROR_INTERNAL);
+    }
     char* strPr = (char*)malloc(st->maxlength*sizeof(char));
     if (fgets(strPr, st->maxlength, st->fp) == NULL){
         exit(ERROR_INTERNAL);
@@ -82,22 +82,22 @@ void MergeSort(Args* args)
     int r = args->r;
 
     /* Trivial cases (bottom of the tree) */
-        if (r == l)
-                return;
+    if (r == l)
+        return;
 
-        char* fst = (char*)malloc(args->st->maxlength*sizeof(char));
-        char* scnd = (char*)malloc(args->st->maxlength*sizeof(char));
+    char* fst = (char*)malloc(args->st->maxlength*sizeof(char));
+    char* scnd = (char*)malloc(args->st->maxlength*sizeof(char));
 
     FILE* bfp;
     if ((bfp = fopen(args->st->sname, "r+"))==NULL){
         exit(ERROR_INTERNAL);
     }
-        if (fseek(bfp, chLeft, SEEK_SET)) {
-                exit(ERROR_INTERNAL);
-        }
+    if (fseek(bfp, chLeft, SEEK_SET)) {
+        exit(ERROR_INTERNAL);
+    }
 
-        if (r - l == 1)
-        {
+    if (r - l == 1)
+    {
         if (fseek(bfp, chLeft, SEEK_SET)) {
             exit(ERROR_INTERNAL);
         }
@@ -109,19 +109,19 @@ void MergeSort(Args* args)
         }
 
         pthread_mutex_lock(&args->st->lock);
-                if (strcmp(fst, scnd)<0) {
-                        if (fseek(args->st->fp, chLeft, SEEK_SET)) {
-                                exit(ERROR_INTERNAL);
-                        }
-                        fputs(scnd, args->st->fp);
-                        fputs(fst, args->st->fp);
-                }
+        if (strcmp(fst, scnd)<0) {
+            if (fseek(args->st->fp, chLeft, SEEK_SET)) {
+                    exit(ERROR_INTERNAL);
+            }
+            fputs(scnd, args->st->fp);
+            fputs(fst, args->st->fp);
+        }
         pthread_mutex_unlock(&args->st->lock);
         fclose(bfp);
         free(fst);
         free(scnd);
         return;
-        }
+    }
     /* / Trivial cases */
 
     char name[] = {"/tmp/123XXXXXX"};
@@ -129,27 +129,27 @@ void MergeSort(Args* args)
     do {
        fdt = mkstemp(name);
     } while (fdt == -1);
-        FILE* fdtmp = fdopen(fdt,"r+");
-        if (fseek(fdtmp, 0, SEEK_SET)) {
-                exit(ERROR_INTERNAL);
-        }
+    FILE* fdtmp = fdopen(fdt,"r+");
+    if (fseek(fdtmp, 0, SEEK_SET)) {
+        exit(ERROR_INTERNAL);
+    }
 
-        int cnt = l;
-        int chMiddle = chLeft;
+    int cnt = l;
+    int chMiddle = chLeft;
     int base = args->crNumber/2;
     double divider = args->crNumber > 1 ? (double)args->crNumber/base : 2;
 
     /* getting an optimal division of the rest interval between threads */
-        while (cnt != r) {
-                if (fgetc(bfp) == '\n') {
-                        if (cnt <= (r - l - 1) / divider + l)
-                                chMiddle++;
-                        cnt++;
-                } else
-                if (cnt <= (r - l - 1) / divider + l)
-                        chMiddle++;
-        }
-        int m = (r - l - 1) / divider + l;
+    while (cnt != r) {
+        if (fgetc(bfp) == '\n') {
+            if (cnt <= (r - l - 1) / divider + l)
+                chMiddle++;
+            cnt++;
+        } else
+            if (cnt <= (r - l - 1) / divider + l)
+                chMiddle++;
+    }
+    int m = (r - l - 1) / divider + l;
     fclose(bfp);
 
     Args* argsL = (Args*)malloc(sizeof(Args));
@@ -179,7 +179,7 @@ void MergeSort(Args* args)
     argsR->crNumber = args->crNumber - base;
     argsR->st = args->st;
 
-        MergeSort(argsR);
+    MergeSort(argsR);
     free(argsR);
 
     if (args->crNumber > 1){ // waiting for another branch thread be completed
@@ -190,84 +190,84 @@ void MergeSort(Args* args)
     }
     free(argsL);
 
-        int lnLeft = l;
-        int lnRight = m + 1;
-        int xl = chLeft;
-        int xr = chMiddle;
-        int cur = 0;
+    int lnLeft = l;
+    int lnRight = m + 1;
+    int xl = chLeft;
+    int xr = chMiddle;
+    int cur = 0;
 
-        if (fseek(fdtmp, 0, SEEK_SET)) {
-                exit(ERROR_INTERNAL);
-        }
+    if (fseek(fdtmp, 0, SEEK_SET)) {
+        exit(ERROR_INTERNAL);
+    }
 
     /* merging phase */
     pthread_mutex_lock(&args->st->lock);
-        while (r - l + 1 != cur)
-        {
-                if (lnLeft > m) {
-                        if (fseek(args->st->fp, xr, SEEK_SET)) {
-                                exit(ERROR_INTERNAL);
-                        }
-                        if (fgets(fst, args->st->maxlength, args->st->fp) == NULL){
+    while (r - l + 1 != cur)
+    {
+        if (lnLeft > m) {
+            if (fseek(args->st->fp, xr, SEEK_SET)) {
+                    exit(ERROR_INTERNAL);
+            }
+            if (fgets(fst, args->st->maxlength, args->st->fp) == NULL){
                 exit(ERROR_INTERNAL);
             }
-                        fputs(fst,fdtmp);
-                        cur++;
-                        lnRight++;
-                        xr += strlen(fst);
-                }
-                else if (lnRight>r) {
-                        if (fseek(args->st->fp, xl, SEEK_SET)) {
-                                exit(ERROR_INTERNAL);
-                        }
-                        if (fgets(scnd,args->st->maxlength, args->st->fp) == NULL){
-                exit(ERROR_INTERNAL);
-            }
-                        fputs(scnd, fdtmp);
-                        cur++;
-                        lnLeft++;
-                        xl += strlen(scnd);
-                }
-                else {
-                        if (fseek(args->st->fp, xl, SEEK_SET)) {
-                                exit(ERROR_INTERNAL);
-                        }
-                        if (fgets(fst, args->st->maxlength, args->st->fp) == NULL){
-                exit(ERROR_INTERNAL);
-            }
-                        if (fseek(args->st->fp, xr, SEEK_SET)) {
-                                exit(ERROR_INTERNAL);
-                        }
-                        if (fgets(scnd, args->st->maxlength, args->st->fp) == NULL){
-                exit(ERROR_INTERNAL);
-            }
-                        if (strcmp(fst, scnd)<0) {
-                                fputs(scnd, fdtmp);
-                                cur++;
-                                lnRight++;
-                                xr += strlen(scnd);
-                        }
-                        else {
-                                fputs(fst, fdtmp);
-                                cur++;
-                                lnLeft++;
-                                xl += strlen(fst);
-                        }
-                }
+            fputs(fst,fdtmp);
+            cur++;
+            lnRight++;
+            xr += strlen(fst);
         }
-        if (fseek(args->st->fp, chLeft, SEEK_SET)) {
+        else if (lnRight>r) {
+            if (fseek(args->st->fp, xl, SEEK_SET)) {
+                    exit(ERROR_INTERNAL);
+            }
+            if (fgets(scnd,args->st->maxlength, args->st->fp) == NULL){
                 exit(ERROR_INTERNAL);
+            }
+            fputs(scnd, fdtmp);
+            cur++;
+            lnLeft++;
+            xl += strlen(scnd);
         }
-        if (fseek(fdtmp, 0, SEEK_SET)) {
+        else {
+            if (fseek(args->st->fp, xl, SEEK_SET)) {
+                    exit(ERROR_INTERNAL);
+            }
+            if (fgets(fst, args->st->maxlength, args->st->fp) == NULL){
                 exit(ERROR_INTERNAL);
+            }
+            if (fseek(args->st->fp, xr, SEEK_SET)) {
+                exit(ERROR_INTERNAL);
+            }
+            if (fgets(scnd, args->st->maxlength, args->st->fp) == NULL){
+                exit(ERROR_INTERNAL);
+            }
+            if (strcmp(fst, scnd)<0) {
+                fputs(scnd, fdtmp);
+                cur++;
+                lnRight++;
+                xr += strlen(scnd);
+            }
+            else {
+                fputs(fst, fdtmp);
+                cur++;
+                lnLeft++;
+                xl += strlen(fst);
+            }
         }
-        for (int i = 0; i<cur; i++)
-        {
-                if(fgets(fst, args->st->maxlength, fdtmp) == NULL){
+    }
+    if (fseek(args->st->fp, chLeft, SEEK_SET)) {
+        exit(ERROR_INTERNAL);
+    }
+    if (fseek(fdtmp, 0, SEEK_SET)) {
+        exit(ERROR_INTERNAL);
+    }
+    for (int i = 0; i<cur; i++)
+    {
+        if(fgets(fst, args->st->maxlength, fdtmp) == NULL){
             exit(ERROR_INTERNAL);
         }
-                fputs(fst, args->st->fp);
-        }
+        fputs(fst, args->st->fp);
+    }
     pthread_mutex_unlock(&args->st->lock);
     fclose(fdtmp);
 }
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
     /* checking the correctness of input data */
     if (argc == 1 || argc > 3) {
         printf("Invalid number of argumnets...\nUsage %s pathname cores_number\n",argv[0]);
-       exit(ERROR_ARG_NUMBER);
+        exit(ERROR_ARG_NUMBER);
     }
     if (access(argv[1], F_OK) == -1){
         printf("err13123123\n");
@@ -285,49 +285,49 @@ int main(int argc, char *argv[])
     }
     int thrNum=0;
     if (argc==3){
-    char* str = "^[0-9]*$";
-    regex_t regex;
-    if(regcomp(&regex,str,0)){
-        exit(ERROR_INTERNAL);
-    }
+        char* str = "^[0-9]*$";
+        regex_t regex;
+        if(regcomp(&regex,str,0)){
+            exit(ERROR_INTERNAL);
+        }
 
-    int ret=0;
-    if (!(ret = regexec(&regex,argv[2],0,NULL,0))){
-        thrNum=atoi(argv[2]);
-    } else if (ret == REG_NOMATCH){
-        exit(ERROR_ARG_NCORES);
-    } else {
-        exit(ERROR_INTERNAL);
-    }
-    if (!thrNum){
-        exit(ERROR_ARG_NCORES);
-    }
-    regfree(&regex);
-    } else {
-        thrNum=4;   //May be more optimal to look in /proc/cpuinfo,
-                    //which is specific for certain distribution
+        int ret=0;
+        if (!(ret = regexec(&regex,argv[2],0,NULL,0))){
+            thrNum=atoi(argv[2]);
+        } else if (ret == REG_NOMATCH){
+            exit(ERROR_ARG_NCORES);
+        } else {
+            exit(ERROR_INTERNAL);
+        }
+        if (!thrNum){
+            exit(ERROR_ARG_NCORES);
+        }
+        regfree(&regex);
+    }   else {
+            thrNum=4;   //May be more optimal to look in /proc/cpuinfo,
+                        //which is specific for certain distribution
     }
 
     Static* st = (Static*)malloc(sizeof(Static));
-        st->sname = argv[1];
+    st->sname = argv[1];
     st->numlines=0;
     st->maxlength=0;
-        if ((st->fp = fopen(st->sname, "r+"))==NULL){
+    if ((st->fp = fopen(st->sname, "r+"))==NULL){
         exit(ERROR_INTERNAL);
     }
     /* getting maximum length of the certain line and the total lines number */
-        int curlength = 0;
-        while (!feof(st->fp)) {
-                if (fgetc(st->fp) == '\n') {
-                        if (curlength >= st->maxlength)
-                                st->maxlength = curlength+1;
-                        curlength = 0;
-                        st->numlines++;
-                } else
-                        curlength++;
-        }
-        st->maxlength++;
-        rewind(st->fp);
+    int curlength = 0;
+    while (!feof(st->fp)) {
+        if (fgetc(st->fp) == '\n') {
+            if (curlength >= st->maxlength)
+                st->maxlength = curlength+1;
+            curlength = 0;
+            st->numlines++;
+        } else
+            curlength++;
+    }
+    st->maxlength++;
+    rewind(st->fp);
 
     if (st->numlines == 0){
         exit(ERROR_EMPTY_FILE);
